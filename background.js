@@ -1,5 +1,5 @@
 let sidePanelPort = null;
-const GEMINI_KEY = env.GEMINI_KEY_2; 
+const GEMINI_KEY = process.env.GEMINI_KEY_1; // Use the first key by default
 
 chrome.runtime.onConnect.addListener((port) => {
   if (port.name === 'sidepanel') {

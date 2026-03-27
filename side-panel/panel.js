@@ -6,7 +6,7 @@ chrome.storage.local.get(['uiState', 'latestSummary'], (result) => {
     if (result.uiState === 'loading') {
         if (container) container.style.display = 'block';
         if (text) text.innerText = 'Summarizing...';
-    } 
+    }
     else if (result.latestSummary) {
         if (container) container.style.display = 'block';
         if (text) text.innerText = result.latestSummary;
@@ -18,16 +18,17 @@ let backgroundPort = null;
 // Connect to background script
 backgroundPort = chrome.runtime.connect({ name: 'sidepanel' });
 console.log('[Panel] Connected to background');
-
-document.getElementById('get-review').addEventListener('click', () => {
-    console.log('[Panel] Get Reviews button clicked');
-    const responseContainer = document.getElementById('response-container');
-    const responseText = document.getElementById('response-text');
-    if (responseContainer && responseText) {
-        responseContainer.style.display = 'block';
-        responseText.innerText = 'Summarizing...';
-    }
-    chrome.runtime.sendMessage({ action: 'get-reviews' });
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById('get-review').addEventListener('click', () => {
+        console.log('[Panel] Get Reviews button clicked');
+        const responseContainer = document.getElementById('response-container');
+        const responseText = document.getElementById('response-text');
+        if (responseContainer && responseText) {
+            responseContainer.style.display = 'block';
+            responseText.innerText = 'Summarizing...';
+        }
+        chrome.runtime.sendMessage({ action: 'get-reviews' });
+    });
 });
 
 // Listen for messages from background script via port
@@ -37,7 +38,7 @@ backgroundPort.onMessage.addListener((message) => {
     if (message.action === 'STATUS_UPDATE') {
         const responseContainer = document.getElementById('response-container');
         const responseText = document.getElementById('response-text');
-        
+
         if (responseContainer && responseText) {
             responseContainer.style.display = 'block';
             responseText.innerText = message.text;
