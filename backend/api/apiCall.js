@@ -4,6 +4,12 @@ async function handleGeminiRequest(reviewArr) {
   if (!reviewArr || reviewArr.length === 0) {
       throw new Error("No reviews found to summarize.");
   }
+
+  if (!GEMINI_KEY) {
+      console.error("FATAL: GEMINI_KEY is undefined. Check your .env file!");
+      throw new Error("Server configuration error: Missing API Key.");
+  }
+
   const prompt = `Summarize these reviews in 150 words or less and Be concise, accurate, and include both pros and cons:\n${reviewArr.join('\n')}`;
 
   try {
@@ -17,7 +23,9 @@ async function handleGeminiRequest(reviewArr) {
     );
 
     if (!res.ok) {
-        throw new Error(`Gemini API Error: ${res.status}`);
+        const errorDetails = await res.text(); // Grab the error body from Google
+        console.error("Google API Error Details:", errorDetails);
+        throw new Error(`Gemini API Error: ${res.status} - Check backend terminal for details.`);
     }
 
     const data = await res.json();
@@ -34,4 +42,5 @@ async function handleGeminiRequest(reviewArr) {
     throw err;
   }
 }
+
 module.exports = handleGeminiRequest;
