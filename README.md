@@ -52,7 +52,7 @@ GEMINI_KEY=your_api_key_here
 ## Installation (Development)
 Clone the repository
 
-- git clone https://github.com/AryanSharma48/amazon-ai-assistant.git
+- git clone https://github.com/AryanSharma48/swan-ai-assistant.git
 
 - Open Chrome and navigate to:
 
