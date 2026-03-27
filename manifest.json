@@ -1,7 +1,7 @@
 {
     "manifest_version" : 3,
     "name" : "SWAN",
-    "version" : "0.2.1",
+    "version" : "0.3.0",
     "description" : "Let SWAN glide effortlessly through the messy reviews to build you a perfect summary of the product.",
     "action": {
         "default_popup" : "pop-up/popup.html"
@@ -22,7 +22,7 @@
     ],
     
     "host_permissions": [
-        "https://generativelanguage.googleapis.com/*",
+        "http://localhost:8080/*",
         "*://*.amazon.com/*",
         "*://*.amazon.in/*"
     ],

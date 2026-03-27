@@ -1,5 +1,4 @@
 let sidePanelPort = null;
-const GEMINI_KEY = process.env.GEMINI_KEY_1; // Use the first key by default
 
 chrome.runtime.onConnect.addListener((port) => {
   if (port.name === 'sidepanel') {
@@ -54,28 +53,28 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 async function handleGeminiRequest(reviewArr, sendResponse) {
   if (!reviewArr || reviewArr.length === 0) {
-      // Send error to panel if review array is empty
       if (sidePanelPort) sidePanelPort.postMessage({ action: 'DISPLAY_SUMMARY', answer: "No reviews found to summarize." });
       return;
   }
 
-  const prompt = `Summarize these reviews in 150 words or less and Be concise, accurate, and include both pros and cons:\n${reviewArr.join('\n')}`;
-
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`,
-      {
+    // Calling Express backend
+    const res = await fetch('http://localhost:8080/api/summarize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-      }
-    );
+        body: JSON.stringify({ reviewArr: reviewArr })
+    });
 
     const data = await res.json();
-    let answer = data.candidates?.[0]?.content?.parts?.[0]?.text || "Gemini returned an empty response.";
 
-    console.log('[Gemini] Success.');
+    // Catch errors returned by your backend
+    if (!res.ok || !data.success) {
+        throw new Error(data.error || "Backend failed to generate summary.");
+    }
 
+    let answer = data.answer;
+
+    console.log('[Backend] Success.');    
     chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
         if (tab?.id) {
             chrome.tabs.sendMessage(tab.id, { action: "SUMMARY_COMPLETE" });
@@ -88,10 +87,12 @@ async function handleGeminiRequest(reviewArr, sendResponse) {
 
     chrome.storage.local.set({ 'latestSummary': answer , 'uiState' : 'ready' });
 
-    sendResponse({ success: true, answer });
+    if (sendResponse) {
+        sendResponse({ success: true, answer });
+    }
 
   } catch (err) {
-    console.error('[Gemini] API Error:', err);
+    console.error('[Backend Connection Error]:', err);
     if (sidePanelPort) {
         sidePanelPort.postMessage({ action: 'DISPLAY_SUMMARY', answer: "Error: " + err.message });
     }
